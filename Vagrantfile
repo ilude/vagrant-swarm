@@ -8,7 +8,7 @@ servers = %w[manager worker-1 worker-2]
 Vagrant.configure(2) do |config|
   servers.each do |server|
     config.vm.define server do |node|
-      node.vm.box = "kmm/ubuntu-xenial64"
+      node.vm.box = "ilude/ubuntu-xenial-64"
       node.vm.hostname = "#{File.basename(Dir.getwd)}-#{Socket.gethostname}-#{server}"
       node.vm.network :public_network, bridge: env['switch_name']
       node.vm.synced_folder ".", "/vagrant", type: "smb", smb_username: env['smb_username'], smb_password: env['smb_password']
