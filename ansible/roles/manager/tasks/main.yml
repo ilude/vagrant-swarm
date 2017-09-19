@@ -1,0 +1,21 @@
+---
+
+- name: Record manager IP address
+  shell: >
+    echo {{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }} > /vagrant/manager_ip
+
+- name: Checking Swarm Mode Status
+  command: "docker info"
+  register: "docker_info"
+  changed_when: false
+
+- name: Initialize Swarm manager
+  shell: >
+    docker swarm init --advertise-addr {{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}
+  when: >
+    'Swarm: inactive' in docker_info.stdout
+
+- name: Record swarm worker token
+  shell: >
+    docker swarm join-token -q worker > /vagrant/worker_token
+  

@@ -1,0 +1,16 @@
+---
+- name: Checking Swarm Mode Status
+  command: "docker info"
+  register: "docker_info"
+  changed_when: false
+
+- name: Join Swarm
+  shell: >
+    SWARM_MANAGER_IP=`cat /vagrant/manager_ip`;
+    SWARM_TOKEN=`cat /vagrant/worker_token`;
+    docker swarm join \
+      --listen-addr {{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}:2377 \
+      --advertise-addr {{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }} \
+      --token=$SWARM_TOKEN $SWARM_MANAGER_IP:2377
+  when: >
+    'Swarm: inactive' in docker_info.stdout

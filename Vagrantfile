@@ -17,10 +17,12 @@ Vagrant.configure(2) do |config|
         hv.vmname = "#{File.basename(Dir.getwd)}-#{Socket.gethostname}-#{server}"
         hv.memory = 1024
         hv.cpus = 2
+        hv.enable_virtualization_extensions = true
+        hv.differencing_disk = true
       end
 
       node.vm.provision "ansible_local" do |ansible|
-        ansible.playbook = "ansible/vagrant_swarm.yml"
+        ansible.playbook = "ansible/swarm_#{server.split(/\-/).first}.yml"
       end
 
     end

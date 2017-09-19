@@ -1,0 +1,9 @@
+---
+
+- hosts: all
+  become: yes
+  vars:
+
+  roles:
+    - docker
+    - manager
