@@ -1,6 +1,6 @@
 ---
 
-- include: packages.yml
+- include_tasks: packages.yml
 
 - group:
     name: docker
@@ -17,5 +17,5 @@
     state: started
     enabled: yes
 
-- include: docker-compose.yml
+- include_tasks: docker-compose.yml
   when: docker_install_compose
