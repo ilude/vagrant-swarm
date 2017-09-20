@@ -6,8 +6,8 @@
 
 - name: Join Swarm
   shell: >
-    SWARM_MANAGER_IP=`cat /vagrant/manager_ip`;
-    SWARM_TOKEN=`cat /vagrant/worker_token`;
+    SWARM_MANAGER_IP=`cat /vagrant/tmp/manager_ip`;
+    SWARM_TOKEN=`cat /vagrant/tmp/worker_token`;
     docker swarm join \
       --listen-addr {{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}:2377 \
       --advertise-addr {{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }} \

@@ -2,7 +2,7 @@
 
 - name: Record manager IP address
   shell: >
-    echo {{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }} > /vagrant/manager_ip
+    echo {{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }} > /vagrant/tmp/manager_ip
 
 - name: Checking Swarm Mode Status
   command: "docker info"
@@ -17,5 +17,5 @@
 
 - name: Record swarm worker token
   shell: >
-    docker swarm join-token -q worker > /vagrant/worker_token
+    docker swarm join-token -q worker > /vagrant/tmp/worker_token
   
