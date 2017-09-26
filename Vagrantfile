@@ -12,10 +12,10 @@ if ARGV.include?('up')
   Dir.foreach(dir_path) {|f| fn = File.join(dir_path, f); File.delete(fn) if f != '.' && f != '..'&& f != '.keep' }
 end
 
-server_count = 3
+node_count = 3
 
 Vagrant.configure(2) do |config|
-  server_count.times do |server_index|
+  node_count.times do |server_index|
     index = server_index + 1
     server_name = "swarm-#{index}"
     config.vm.define server_name do |node|
@@ -34,6 +34,10 @@ Vagrant.configure(2) do |config|
 
       node.vm.provision "ansible_local" do |ansible|
         ansible.playbook = "ansible/swarm.yml"
+        ansible.extra_vars = {
+          is_vagrant: true,
+          preferred_node_count: node_count
+        }
       end
 
     end

@@ -1,0 +1,6 @@
+- name: Mount glusterfs
+  mount:
+    path: /mnt/glusterfs
+    src: localhost:/glfs01
+    fstype: glusterfs
+    state: present

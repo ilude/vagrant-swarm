@@ -7,3 +7,5 @@
   roles:
     - docker
     - swarm
+    - glusterfs_cluster
+    - glusterfs_client
