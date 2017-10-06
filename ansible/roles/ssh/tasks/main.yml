@@ -36,5 +36,13 @@
     cp /vagrant/tmp/id_rsa /home/vagrant/.ssh
     chmod 600 /home/vagrant/.ssh/id_rsa
 
-    KEY=$(cat /vagrant/tmp/id_rsa.pub)
-    grep -q "$KEY" /home/vagrant/.ssh/authorized_keys || echo "$KEY" >> /home/vagrant/.ssh/authorized_keys 
+    # KEY=$(cat /vagrant/tmp/id_rsa.pub)
+    # grep -q "$KEY" /home/vagrant/.ssh/authorized_keys || echo "$KEY" >> /home/vagrant/.ssh/authorized_keys 
+
+- name: Ensure authorized_key is present
+  authorized_key:
+    user: vagrant
+    state: present
+    key: "{{ lookup('file', '/vagrant/tmp/id_rsa.pub') }}"
+
+    
