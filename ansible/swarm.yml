@@ -5,6 +5,7 @@
   vars:
 
   roles:
+    - ssh
     - docker
     - swarm
     - glusterfs_cluster

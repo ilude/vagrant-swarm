@@ -1,0 +1,49 @@
+#!/bin/bash
+
+VOL_STATUS=$(gluster vol info glfs01 | grep '^Status: ' | awk '{print $2}')
+IPADDRESS=$(ip route get 1 | awk '{print $NF;exit}')
+
+if [ "$VOL_STATUS" != "Started" ]; then
+    cmd="gluster volume create glfs01 replica {{preferred_node_count}} transport tcp "
+    while read node; do
+        cmd+=" ${node}:/brick"
+        if [ "$node" != "$IPADDRESS" ]; then
+            # add peer to cluster
+            gluster peer probe $node
+
+            # add peer to known hosts
+            ssh-keyscan -H $node >> ~/.ssh/known_hosts
+        fi
+    done < /vagrant/tmp/cluster_nodes
+    cmd+=" force"
+    eval $cmd
+
+    # only allow localhost to mount volumes
+    gluster volume set glfs01 auth.allow 127.0.0.1
+
+    # start the cluster
+    gluster volume start glfs01
+fi
+
+while read node; do
+  echo "Node: $node"
+  if [ "$node" != "$IPADDRESS" ]; then
+    { ssh -T vagrant@$node << EOF
+      if ! grep -qs "/mnt/glusterfs" /proc/mounts; then
+        echo "Mounting localhost:/glfs01 /mnt/glusterfs on $node"
+        sudo mount -t glusterfs localhost:/glfs01 /mnt/glusterfs;
+      else
+        echo "Mount /mnt/glusterfs exists on $node"
+      fi
+EOF
+} || true
+  else
+      if ! grep -qs "/mnt/glusterfs" /proc/mounts; then
+        echo "Mounting localhost:/glfs01 /mnt/glusterfs on localhost"
+        mount -t glusterfs localhost:/glfs01 /mnt/glusterfs || true
+      else
+        echo "Mount /mnt/glusterfs exists on localhost"
+      fi
+  fi
+done < /vagrant/tmp/cluster_nodes
+

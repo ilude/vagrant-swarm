@@ -1,0 +1,40 @@
+---
+
+- stat:
+    path: /vagrant/tmp/id_rsa.pub
+  register: shared_pub_key
+
+- stat:
+    path: /vagrant/tmp/id_rsa
+  register: shared_priv_key
+
+- name: Generate SSH key
+  shell: |
+    ssh-keygen -t rsa -N "" -f /home/vagrant/.ssh/id_rsa
+    cp /home/vagrant/.ssh/id_rsa* /vagrant/tmp
+  when: >
+    shared_pub_key.stat.islnk is not defined 
+    and shared_priv_key.stat.islnk is not defined
+
+- name: Ensure root .ssh directory exists
+  file:
+    path: /root/.ssh
+    state: directory
+    mode: 0700
+
+- name: Ensure vagrant .ssh directory exists
+  file:
+    path: /home/vagrant/.ssh
+    state: directory
+    mode: 0700
+
+- name: Install SSH keys
+  shell: |
+    cp /vagrant/tmp/id_rsa /root/.ssh
+    chmod 600 /root/.ssh/id_rsa
+
+    cp /vagrant/tmp/id_rsa /home/vagrant/.ssh
+    chmod 600 /home/vagrant/.ssh/id_rsa
+
+    KEY=$(cat /vagrant/tmp/id_rsa.pub)
+    grep -q "$KEY" /home/vagrant/.ssh/authorized_keys || echo "$KEY" >> /home/vagrant/.ssh/authorized_keys 

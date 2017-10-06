@@ -42,21 +42,23 @@
   shell: gluster peer status
   register: gluster_peer_status
 
-- name: Initialize glusterfs replicas
-  shell: |
-    cmd="gluster volume create glfs01 replica {{preferred_node_count}} transport tcp "
-    while read node; do
-        cmd+=" ${node}:/brick"
-        if [$node != '{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}']; then
-          eval "gluster peer probe $node"
-        fi
-    done < /vagrant/tmp/cluster_nodes
-    cmd+=" force"
-    eval $cmd
-    gluster volume start glfs01
+- name: Create Gluster Init Script
+  template:
+    src: gluster_setup.j2
+    dest: /usr/local/bin/gluster_setup.sh
+    mode: 0755
+
+- name: Setup glusterfs replicas
+  shell: /usr/local/bin/gluster_setup.sh 2>&1
+  register: gluster_setup_output
   when: >
     'Number of Peers: 0' in gluster_peer_status.stdout
     and node_count.stdout|int == preferred_node_count|int
+
+- name: Debug output from gluster setup
+  debug: var=gluster_setup_output.stdout_lines
+  when: >
+    gluster_setup_output is defined
 
 
     
