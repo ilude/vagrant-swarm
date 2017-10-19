@@ -18,10 +18,26 @@
     groups: docker
     append: yes
 
+- name: create docker systemd override directory
+  file:
+    path: /etc/systemd/system/docker.service.d
+    state: directory
+
+- name: add docker systemd override
+  copy:
+    src: override.conf
+    dest: /etc/systemd/system/docker.service.d/override.conf
+
+- name: add systemd override
+  copy:
+    src: daemon.json
+    dest: /etc/docker/daemon.json
+
 - name: Ensure Docker is started and enabled at boot.
-  service:
+  systemd:
     name: docker
-    state: started
+    daemon_reload: yes
+    state: restarted
     enabled: yes
 
 - include_tasks: docker-compose.yml
